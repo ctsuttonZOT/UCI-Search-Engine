@@ -58,13 +58,4 @@ def printFreq (freq):
     for token in freq: # O(n)
         print(token[0], token[1])
 
-# Time complexity: O(n ^ 2). computeWordFrequencies() is O(n ^ 2) and dominates. 
-def main():
-    listRes = tokenize(sys.argv[1])
-    if listRes == None or len(listRes) == 0: # No tokens are in it\
-        return
-    mapFreq = computeWordFrequencies(listRes)
-    printFreq(mapFreq)
 
-if __name__ == "__main__":
-    main()
