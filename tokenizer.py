@@ -1,0 +1,70 @@
+import sys
+
+# Time Complexity: O(1), it does a constant amount of comparisons each function call
+def isAlphanumerical(char):
+    if (char >= 'a' and char <= 'z') or (char >= 'A' and char <= 'Z'):
+        return True 
+    elif char >= '0' and char <= '9':
+        return True
+    return False
+
+# Worst Case: O(n ^ 2), n being the number of characters in the file. The while loop
+# iterates n times and inside, it could possibly use append() which has a worst case
+# of O(n), but amortized has a runtime of O(1)
+def tokenize(txtFilePath):
+    try:
+        f = open(txtFilePath, 'r', encoding='utf8')
+    except OSError:
+        print("Can't read or open file:", txtFilePath)
+        return None
+    listTokens = [] # list to return
+    bufferChars = "" # buffer for word
+    currToken = False
+    while True:
+        char = f.read(1)
+        if not char: # EOF
+            break
+        # read alphanumerical characters, treat spaces and special characters as delimiters
+        # "a token is a sequence of alphanumeric characters, independent of capitalization"
+        isChar = isAlphanumerical(char)
+        if isChar:
+            bufferChars = bufferChars + char
+            currToken = True
+        else:
+            if currToken:
+                listTokens.append(bufferChars)
+                currToken = False
+            bufferChars = ""
+    if currToken:
+        listTokens.append(bufferChars)
+    f.close()
+    return listTokens
+
+# Time Complexity: O(n ^ 2). The outer loop runs n times, n being the number of tokens (not unique). 
+# Inside there is a constant amount of O(n) statements (lower(), dict access/update)
+def computeWordFrequencies(listTokens):
+    resDict = {}
+    for str in listTokens: # O(n)
+        tempStr = str.lower() # O(n)
+        if tempStr not in resDict: 
+            resDict[tempStr] = 1 # O(n) worst, O(1) avg
+        else:
+            resDict[tempStr] = resDict[tempStr] + 1 # O(n) worst, O(1) avg
+    return resDict
+
+# Time Complexity: O(n logn). sorted() is O(n log n). 
+def printFreq (freq):
+    freq = sorted(freq.items(), key=lambda x: x[1], reverse=True) # O(n logn )
+    for token in freq: # O(n)
+        print(token[0], token[1])
+
+# Time complexity: O(n ^ 2). computeWordFrequencies() is O(n ^ 2) and dominates. 
+def main():
+    listRes = tokenize(sys.argv[1])
+    if listRes == None or len(listRes) == 0: # No tokens are in it\
+        return
+    mapFreq = computeWordFrequencies(listRes)
+    printFreq(mapFreq)
+
+if __name__ == "__main__":
+    main()
