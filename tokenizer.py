@@ -84,17 +84,3 @@ def extract_tags(json_file: str) ->list: #maybe change parameter
     special_text = anchors + bolds + headers
     
     return special_text
-
-#new method, for M1, getting bolds, anchors, etc. Modify to add more special constraints if needed
-def extract_tags(json_file: str) ->list: #maybe change parameter
-    html = json_file["content"]
-    soup = BeautifulSoup(html, 'html.parser')
-    
-    #get all the unique/important texts
-    anchors = [a.get_text() for a in soup.find_all('a')]
-    bolds = [b.get_text() for b in soup.find_all(['b', 'strong'])]
-    headers = [h.get_text() for h in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])]
-    
-    special_text = anchors + bolds + headers
-    
-    return special_text
