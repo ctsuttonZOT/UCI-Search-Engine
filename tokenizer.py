@@ -61,7 +61,7 @@ def printFreq (freq):
 
 #new method, for M1, getting bolds, anchors, etc. Modify to add more special constraints if needed
 def extract_tags(json_file: str) ->list: #maybe change parameter
-    html = json_file[html]
+    html = json_file["content"]
     soup = BeautifulSoup(html, 'html.parser')
     
     #get all the unique/important texts
