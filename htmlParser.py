@@ -7,12 +7,20 @@ from pympler import asizeof
 
 root_dir = r"C:\Users\rickg\OneDrive\Desktop\developer\DEV"
 
+milestone = 400000000
+countPrints = 0
 mapTemp = {}
 
 fileNum = 0
 
 # want to get count of tokens, bolded or not, header or not, title or not
 def htmlParser(htmlContent):
+
+    if fileNum % 500 == 0 and fileNum != 0:
+        sz1 = asizeof.asizeof(mapTemp)
+        if sz1 >= milestone:
+            printToFileEachEntry()
+
 
     soup = BeautifulSoup(htmlContent, 'html.parser')
     
@@ -91,51 +99,52 @@ def listToString(lst):
         str += " " + item.get_text(separator=" ", strip=True)
     return str
 
-def processText(text): # text -> [(token, count), ...], returns list of tokens with count for a string of text
+
+def processText(text): # text -> [(token, count), ...], returns list of tokens with count of occurences 
     tempMap = computeWordFrequencies(tokenize(text))
     res = []
     for key, val in tempMap.items():
         res.append((key, val))
     return res
 
-html_doc = """
-<html><head><title>The Dormouse's story</title></head>
-<body>
-<p class="title"><b>The Dormouse's story</b></p>
-
-<p class="story">Once upon a time there were three little sisters; and their names were
-
-<b> bb <a href="http://example.com/elsie" class="sister" id="link1"> Elsie </a> </b>,
-<a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
-<a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
-and they lived at the bottom of a well.</p>
-
-<p class="story">...</p>
-"""
  
-def fileProcessor(fileName): # CHECK
+def fileProcessor(fileName): # opens file, loads json, sends text content to json
     #try:
         with open(fileName, 'r') as f:   
             fileJson = json.load(f)
         text = fileJson["content"]
         htmlParser(text)
+        with open("urls.txt", 'a') as f:
+            jsonTemp = {str(fileNum) : fileJson["url"]}
+            f.write(json.dumps(jsonTemp) + "\n")
     #except:
-        #print("RUH ROH")
+        #print("error")
 
 
-def printToFileEntire(): # CHECK
-    with open("results.txt", 'w') as f:   
-        f.write(json.dumps(mapTemp) + '\n')
+
+
 def printToFileEachEntry(): # CHECK
-    with open("results.txt", 'a') as f:
+    # Sort map
+    global mapTemp
+    global countPrints
+    sortedKeys = sorted(mapTemp.keys())
+    mapTemp = {key: mapTemp[key] for key in sortedKeys}
+    # Dump jsons
+    with open("results" + str(countPrints) + ".txt", 'a') as f:
         for key, value in mapTemp.items():
             jsonTemp = {key: value}
             f.write(json.dumps(jsonTemp) + "\n")
-def mainFunc(): # CHECK
+    # Clear map
+    countPrints += 1
+    mapTemp = {}
+
+def mainFunc(): # For all files in directory root_dir, call fileProcessor
     for dirpath, dirnames, filenames in os.walk(root_dir):
         for fn in filenames:
             pathToFile = os.path.join(dirpath, fn)
             fileProcessor(pathToFile)
-    printToFileEachEntry()
+    printToFileEachEntry() # printFileAtEnd
+
+
 
 mainFunc()
