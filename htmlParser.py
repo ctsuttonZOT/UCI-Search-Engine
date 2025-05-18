@@ -2,10 +2,9 @@ from bs4 import BeautifulSoup, Tag
 from tokenizer import tokenize, computeWordFrequencies
 import json
 import os
-import sys
 from pympler import asizeof
 
-root_dir = r"C:\Users\rickg\OneDrive\Desktop\developer\DEV"
+root_dir = "DEV"
 
 milestone = 400000000
 countPrints = 0
@@ -78,6 +77,8 @@ def updateSingle(stats, k):
                 return
             mapTemp[stats[i][0]] = [ [], [], [], [], [], []]
             mapTemp[stats[i][0]][k].append((fileNum, stats[i][1]))
+
+
 def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # DONE, called after each 
     global fileNum
     updateSingle(allTxt, 0)
@@ -93,6 +94,7 @@ def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # DONE, called after each
         print(total_size)
     fileNum += 1
 
+
 def listToString(lst):
     str = ""
     for item in lst:
@@ -107,7 +109,7 @@ def processText(text): # text -> [(token, count), ...], returns list of tokens w
         res.append((key, val))
     return res
 
- 
+
 def fileProcessor(fileName): # opens file, loads json, sends text content to json
     #try:
         with open(fileName, 'r') as f:   
@@ -119,8 +121,6 @@ def fileProcessor(fileName): # opens file, loads json, sends text content to jso
             f.write(json.dumps(jsonTemp) + "\n")
     #except:
         #print("error")
-
-
 
 
 def printToFileEachEntry(): # CHECK
@@ -138,6 +138,7 @@ def printToFileEachEntry(): # CHECK
     countPrints += 1
     mapTemp = {}
 
+
 def mainFunc(): # For all files in directory root_dir, call fileProcessor
     for dirpath, dirnames, filenames in os.walk(root_dir):
         for fn in filenames:
@@ -146,5 +147,5 @@ def mainFunc(): # For all files in directory root_dir, call fileProcessor
     printToFileEachEntry() # printFileAtEnd
 
 
-
-mainFunc()
+if __name__ == "__main__":
+    mainFunc()
