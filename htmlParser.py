@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup, Tag
 from tokenizer import tokenize, computeWordFrequencies
+from posting import Posting
 import json
 import os
 from pympler import asizeof
@@ -13,7 +14,7 @@ mapTemp = {}
 fileNum = 0
 
 # want to get count of tokens, bolded or not, header or not, title or not
-def htmlParser(htmlContent):
+def htmlParser(htmlContent, url):
 
     if fileNum % 500 == 0 and fileNum != 0:
         sz1 = asizeof.asizeof(mapTemp)
@@ -41,42 +42,43 @@ def htmlParser(htmlContent):
     h3 = listToString(h3s)
 
     # return list of pairs with token and count [(token, count), ...]
-    bolds = processText(bold)
-    titles = processText(title)
-    h1s = processText(h1)
-    h2s = processText(h2)
-    h3s = processText(h3)
+    bolds = processText(bold, url)
+    titles = processText(title, url)
+    h1s = processText(h1, url)
+    h2s = processText(h2, url)
+    h3s = processText(h3, url)
 
-    texts = processText(allText)
+    texts = processText(allText, url)
     #print(bolds)
     
     # update map
     #print(len(h1s))
     #print(len(h1s[0]))
-    updateMap(texts, title, bolds, h1s, h2s, h3s)
+    updateMap(texts, titles, bolds, h1s, h2s, h3s)
 
 
-def updateSingle(stats, k):
-    #print(str(k), "---", stats)
+def updateSingle(stats: list[Posting], k):
+    # print(str(k), "---", stats)
     #return
     if len(stats) == 0:
         return
     #if k == 1:
 
     for i in range(0, len(stats)):
-        if stats[i][0] in mapTemp:
+        curr_posting = stats[i]
+        if curr_posting.token in mapTemp:
             #print(stats)
             if k == 1:
-                mapTemp[stats[i][0]][k].append((fileNum))
+                mapTemp[curr_posting.token][k].append((curr_posting.url_id))
                 return
-            (mapTemp[stats[i][0]])[k].append((fileNum, stats[i][1]))
+            (mapTemp[curr_posting.token])[k].append((curr_posting.url_id, curr_posting.token_freq))
         else:
             if k == 1:
-                mapTemp[stats[i][0]] = [ [], [], [], [], [], []]
-                mapTemp[stats[i][0]][k].append((fileNum))
+                mapTemp[curr_posting.token] = [ [], [], [], [], [], []]
+                mapTemp[curr_posting.token][k].append((curr_posting.url_id))
                 return
-            mapTemp[stats[i][0]] = [ [], [], [], [], [], []]
-            mapTemp[stats[i][0]][k].append((fileNum, stats[i][1]))
+            mapTemp[curr_posting.token] = [ [], [], [], [], [], []]
+            mapTemp[curr_posting.token][k].append((curr_posting.url_id, curr_posting.token_freq))
 
 
 def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # DONE, called after each 
@@ -102,11 +104,11 @@ def listToString(lst):
     return str
 
 
-def processText(text): # text -> [(token, count), ...], returns list of tokens with count of occurences 
+def processText(text, url): # text -> [(token, count), ...], returns list of tokens with count of occurences 
     tempMap = computeWordFrequencies(tokenize(text))
     res = []
     for key, val in tempMap.items():
-        res.append((key, val))
+        res.append(Posting(url, key, val))
     return res
 
 
@@ -115,10 +117,7 @@ def fileProcessor(fileName): # opens file, loads json, sends text content to jso
         with open(fileName, 'r') as f:   
             fileJson = json.load(f)
         text = fileJson["content"]
-        htmlParser(text)
-        with open("urls.txt", 'a') as f:
-            jsonTemp = {str(fileNum) : fileJson["url"]}
-            f.write(json.dumps(jsonTemp) + "\n")
+        htmlParser(text, fileJson["url"])
     #except:
         #print("error")
 
