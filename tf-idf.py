@@ -41,6 +41,7 @@ def update_index_scores(filename: str, total_docs: int):
         with open(filename, 'r') as file:
             for line in file:
                 obj = json.loads(line)
+                key = list(obj.keys())[0]
                 data = list(obj.values())
                 idf = compute_idf(data, total_docs)
                 for posting_lists in data:
@@ -52,7 +53,7 @@ def update_index_scores(filename: str, total_docs: int):
                                 posting += [tf*idf]
                                 # print(tf*idf)
                 # write updated line to temp file
-                temp_file.write(json.dumps(data) + '\n')
+                temp_file.write(json.dumps({key: data}) + '\n')
     # replace original index with new index that has tf-idf scores
     os.replace(temp_file.name, filename)
 
