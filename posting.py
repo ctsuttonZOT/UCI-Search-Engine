@@ -39,10 +39,6 @@ class Posting:
         # add new URL with new id
         Posting.id_cache[url] = index
 
-        # update file
-        with open("url_ids.json", "w") as file:
-            json.dump(Posting.id_cache, file)
-
         return index
 
 

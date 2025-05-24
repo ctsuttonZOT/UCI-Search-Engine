@@ -137,6 +137,10 @@ def printToFileEachEntry(): # CHECK
     countPrints += 1
     mapTemp = {}
 
+    # update doc id file
+    with open("url_ids.json", "w") as file:
+        json.dump(Posting.id_cache, file)
+
 
 def mainFunc(): # For all files in directory root_dir, call fileProcessor
     for dirpath, dirnames, filenames in os.walk(root_dir):
