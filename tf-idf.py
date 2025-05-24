@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+import sys
 from math import log
 
 # weights for normal, title, bold, h1, h2, h3
@@ -44,20 +45,27 @@ def update_index_scores(filename: str, total_docs: int):
                 key = list(obj.keys())[0]
                 data = list(obj.values())
                 idf = compute_idf(data, total_docs)
-                for posting_lists in data:
-                    for posting_list in posting_lists:
+                for posting_list in data[0]:
+                    # these try except blocks are to avoid bugs caused by index w/ incorrect format
+                    try:
                         for posting in posting_list:
                             if len(posting) != 0:
                                 tf = calculate_weighted_tf(data[0], posting[0])
                                 # 'append' tf-idf score to posting
                                 posting += [tf*idf]
                                 # print(tf*idf)
+                    except TypeError:
+                        continue
                 # write updated line to temp file
                 temp_file.write(json.dumps({key: data}) + '\n')
     # replace original index with new index that has tf-idf scores
     os.replace(temp_file.name, filename)
 
 
-def rank_documents(query: str, total_docs: int) -> list[tuple[int, int]]:
-    # TODO: implement once merged index and merged index search is finished
-    pass
+# python3 tf-idf.py [index_file_path] [total_docs]
+def main():
+    update_index_scores(sys.argv[1], int(sys.argv[2]))
+
+
+if __name__ == "__main__":
+    main()
