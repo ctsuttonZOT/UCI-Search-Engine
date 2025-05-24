@@ -29,6 +29,8 @@ class InvertedIndexSearcher:
         with open(self.index_file_path, 'rb') as f:
             f.seek(offset)
 
+            # print(f.readline())
+
             obj = json.loads(f.readline())
 
             return obj
@@ -42,15 +44,15 @@ class InvertedIndexSearcher:
 
             if token_offset is None:
                 return []
-            print(f'Token: {token.lower()} is at Offset {token_offset[0]}')
+            # print(f'Token: {token.lower()} is at Offset {token_offset[0]}')
 
             postings = self._get_postings(int(token_offset[0]))[token.lower()][0]
-            token_freq_map = {doc_id: freq for doc_id, freq in postings}
-
+            # token_freq_map = {doc_id: freq for doc_id, freq in postings}
+            # print(postings)
             if postings is None:
                 return []
-            
-            results.append(token_freq_map)
+            token_map = {doc_id: post[2] for post in postings}
+            results.append(token_map)
 
 
         # Find common document IDs
@@ -71,10 +73,10 @@ class InvertedIndexSearcher:
 
 def main(): # python3 querySearch.py [key_file_path] [index_file_path]
 
-    query = "acm" # set the query here
-
+    query = input("Enter Query Below (Ex: cristina lopes): ").split()
+    # print(query)
     searcher = InvertedIndexSearcher(sys.argv[1], sys.argv[2])
-    docs = searcher.find_docs(query.split())
+    docs = searcher.find_docs(query)
 
     print("DOC IDs :", docs[:5])
 

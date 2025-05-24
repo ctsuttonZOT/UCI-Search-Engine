@@ -145,6 +145,67 @@ def mainFunc(): # For all files in directory root_dir, call fileProcessor
             fileProcessor(pathToFile)
     printToFileEachEntry() # printFileAtEnd
 
+def mergeTester(numPartitions): # num partitions is the number of results(x).txt files that are produced
+    keyFilePos = {} # (key, value) -> key = token, value = position integer
+    arrayFiles = []
+    arrayLines = []
+    for i in range(0, numPartitions):
+        fn = f"results{i}.txt"
+        f = open(fn, 'r')
+        arrayFiles.append(f)
+        arrayLines.append(f.readline())
+    currPos = 0
+    countOpenFiles = numPartitions
+    
+
+    with open("inverted_indexii.txt", 'a') as ii:
+        while(countOpenFiles):
+            listObjs = []
+            listKeys = []
+            for ln in arrayLines:
+                if ln != "":
+                    obj = json.loads(ln)
+                    listObjs.append(obj)
+                    listKeys.append(list(obj.keys())[0])
+                else:
+                    listObjs.append(None)
+                    listKeys.append(None)
+            smallestKey = None
+            firstEncountered = True
+            for key in listKeys:
+                if (firstEncountered and key) or (key and key < smallestKey):
+                    firstEncountered = False
+                    smallestKey = key
+            # should have smallest key at this point
+            k = smallestKey
+            res = {}
+            
+            for i in range(0, len(listObjs)):
+                obj = listObjs[i]
+                if not(obj):
+                    continue
+                if k in obj:
+                    if k in res:
+                        res[k][0].extend(obj[k][0])
+                        res[k][1].extend(obj[k][1])
+                        res[k][2].extend(obj[k][2])
+                        res[k][3].extend(obj[k][3])
+                        res[k][4].extend(obj[k][4])
+                        res[k][5].extend(obj[k][5])
+                    else:
+                        res[k] = (obj[k])
+                    
+                    fn = arrayFiles[i]
+                    aL = fn.readline()
+                    if aL == "":
+                        fn.close()
+                        arrayFiles[i] = None
+                        arrayLines[i] = ""
+                        countOpenFiles -= 1
+                    else:
+                        arrayLines[i] = aL
+            ii.write(json.dumps(res) + "\n")
+
 
 if __name__ == "__main__":
     mainFunc()
