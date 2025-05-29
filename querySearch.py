@@ -73,7 +73,7 @@ class InvertedIndexSearcher:
 
 def main(): # python3 querySearch.py [key_file_path] [index_file_path]
 
-    query = input("Enter Query Below (Ex: cristina lopes): ").split()
+    query = input("Enter Query (Ex: cristina lopes): ").split()
     # print(query)
     searcher = InvertedIndexSearcher(sys.argv[1], sys.argv[2])
     docs = searcher.find_docs(query)
