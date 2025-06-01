@@ -1,5 +1,5 @@
 import sys
-from porter_stemmer import porter_stem
+from porter_stemming import porter_stem
 from bs4 import BeautifulSoup
 
 

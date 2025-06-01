@@ -2,7 +2,7 @@ import sys
 import json
 from collections import defaultdict
 import time
-
+from porter_stemming import porter_stem
 
 class InvertedIndexSearcher:
 
@@ -42,6 +42,7 @@ class InvertedIndexSearcher:
 
         results = []
         for token in tokens:
+            token =  porter_stem(token)
             token_offset = self._get_offset(token.lower())
             if token_offset is None:
                 return []
