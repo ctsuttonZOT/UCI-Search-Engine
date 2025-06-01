@@ -68,7 +68,28 @@ class InvertedIndexSearcher:
 
         # Sort by total frequency
         sorted_docs = sorted(doc_score.items(), key=lambda x: x[1], reverse=True)
-        return sorted_docs  
+        return sorted_docs
+    
+def server_main(query):
+    # print(query)
+    searcher = InvertedIndexSearcher('offsets.txt', 'inverted_index.txt')
+    start_time = time.time()
+    docs = searcher.find_docs(query)
+    urlMappings = {}
+    with open('url_ids.json', 'r') as f:
+        urlMappings = json.loads(f.read())
+    urls = []
+    for elem in docs[:5]:
+        url = urlMappings[str(elem[0])]
+        urls.append(url)
+        print(url, " ,")
+        # elem has 2 elements
+    #print(docs)
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time:.6f} seconds")
+    searcher.fileHandle.close()
+
+    return urls
 
 def main(): # python3 querySearch.py [key_file_path] [index_file_path]
 
