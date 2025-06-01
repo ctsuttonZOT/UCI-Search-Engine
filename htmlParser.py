@@ -5,18 +5,25 @@ import json
 import os
 from pympler import asizeof
 
-root_dir = "DEV"
+root_dir = r"C:\Users\rickg\OneDrive\Desktop\developer\DEV"
 
-milestone = 400000000
-countPrints = 0
+milestone = 400000000 # 400 MBs / 400,000,000 bytes
+countPrints = 0 
 mapTemp = {}
 
+id_url_map = {}
+
 fileNum = 0
+
+countEmptyStrings = 0
+setEncodings = set()
 
 # want to get count of tokens, bolded or not, header or not, title or not
 def htmlParser(htmlContent, url):
 
+    # Every 500 files, check if our map is larger than 400MB, if so then print entry into its own file
     if fileNum % 500 == 0 and fileNum != 0:
+        print("File number: ", fileNum)
         sz1 = asizeof.asizeof(mapTemp)
         if sz1 >= milestone:
             printToFileEachEntry()
@@ -48,40 +55,35 @@ def htmlParser(htmlContent, url):
     h2s = processText(h2, url)
     h3s = processText(h3, url)
 
+    # process text returns list of Posting elements
     texts = processText(allText, url)
-    #print(bolds)
     
     # update map
-    #print(len(h1s))
-    #print(len(h1s[0]))
     updateMap(texts, titles, bolds, h1s, h2s, h3s)
 
 
 def updateSingle(stats: list[Posting], k):
-    # print(str(k), "---", stats)
-    #return
-    if len(stats) == 0:
+
+    if len(stats) == 0: # empty lists
         return
-    #if k == 1:
 
     for i in range(0, len(stats)):
         curr_posting = stats[i]
         if curr_posting.token in mapTemp:
-            #print(stats)
             if k == 1:
-                mapTemp[curr_posting.token][k].append((curr_posting.url_id))
+                mapTemp[curr_posting.token][k].append((fileNum))
                 return
-            (mapTemp[curr_posting.token])[k].append((curr_posting.url_id, curr_posting.token_freq))
+            (mapTemp[curr_posting.token])[k].append((fileNum, curr_posting.token_freq))
         else:
             if k == 1:
                 mapTemp[curr_posting.token] = [ [], [], [], [], [], []]
-                mapTemp[curr_posting.token][k].append((curr_posting.url_id))
+                mapTemp[curr_posting.token][k].append((fileNum))
                 return
             mapTemp[curr_posting.token] = [ [], [], [], [], [], []]
-            mapTemp[curr_posting.token][k].append((curr_posting.url_id, curr_posting.token_freq))
+            mapTemp[curr_posting.token][k].append((fileNum, curr_posting.token_freq))
 
 
-def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # DONE, called after each 
+def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # called for each file, at end 
     global fileNum
     updateSingle(allTxt, 0)
     updateSingle(title, 1)
@@ -90,11 +92,10 @@ def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # DONE, called after each
     updateSingle(h2s, 4)
     updateSingle(h3s, 5)
     if fileNum % 5000 == 0:
-        print(fileNum)
+        print(fileNum,  " % 5000 == 0 \n")
         total_size = asizeof.asizeof(mapTemp)
 
-        print(total_size)
-    fileNum += 1
+        print("total sz: ",total_size)
 
 
 def listToString(lst):
@@ -113,19 +114,28 @@ def processText(text, url): # text -> [(token, count), ...], returns list of tok
 
 
 def fileProcessor(fileName): # opens file, loads json, sends text content to json
-    #try:
-        with open(fileName, 'r') as f:   
-            fileJson = json.load(f)
-        text = fileJson["content"]
-        htmlParser(text, fileJson["url"])
-    #except:
-        #print("error")
+    global fileNum
+    global id_url_map
+    global countEmptyStrings
+    global setEncodings
+    with open(fileName, 'r') as f:   
+        fileJson = json.load(f)
+    text = fileJson["content"]
+    if text == "":
+        countEmptyStrings += 1
+    setEncodings.add(fileJson["encoding"])
+    id_url_map[fileNum] = fileJson["url"]
+    htmlParser(text, fileJson["url"])
+    #id_url_map[fileNum] = fileJson["url"]
+    fileNum += 1
 
 
-def printToFileEachEntry(): # CHECK
+
+def printToFileEachEntry(): # Sorts current map by key, then writes to file by appending single line json for each entry
     # Sort map
     global mapTemp
     global countPrints
+    global id_url_map
     sortedKeys = sorted(mapTemp.keys())
     mapTemp = {key: mapTemp[key] for key in sortedKeys}
     # Dump jsons
@@ -134,23 +144,34 @@ def printToFileEachEntry(): # CHECK
             jsonTemp = {key: value}
             f.write(json.dumps(jsonTemp) + "\n")
     # Clear map
-    countPrints += 1
+    
     mapTemp = {}
 
-    # update doc id file
-    with open("url_ids.json", "w") as file:
-        json.dump(Posting.id_cache, file)
+
+    countPrints += 1
+
 
 
 def mainFunc(): # For all files in directory root_dir, call fileProcessor
+    global id_url_map   
     for dirpath, dirnames, filenames in os.walk(root_dir):
         for fn in filenames:
             pathToFile = os.path.join(dirpath, fn)
             fileProcessor(pathToFile)
     printToFileEachEntry() # printFileAtEnd
+    with open("url_ids.json", "w") as file:
+        json.dump(id_url_map, file)
+    id_url_map = {}
+    print(countEmptyStrings)
+    print(setEncodings)
+
 
 def mergeTester(numPartitions): # num partitions is the number of results(x).txt files that are produced
-    keyFilePos = {} # (key, value) -> key = token, value = position integer
+    global mapTemp
+    global id_url_map
+    mapTemp = {}
+    id_url_map = {}
+    #keyFilePos = {} # (key, value) -> key = token, value = position integer
     arrayFiles = []
     arrayLines = []
     for i in range(0, numPartitions):
@@ -158,11 +179,10 @@ def mergeTester(numPartitions): # num partitions is the number of results(x).txt
         f = open(fn, 'r')
         arrayFiles.append(f)
         arrayLines.append(f.readline())
-    currPos = 0
+    #currPos = 0
     countOpenFiles = numPartitions
-    
 
-    with open("inverted_indexii.txt", 'a') as ii:
+    with open("inverted_index.txt", 'a') as ii:#, open("keys.txt", 'w') as kFile:
         while(countOpenFiles):
             listObjs = []
             listKeys = []
@@ -211,5 +231,9 @@ def mergeTester(numPartitions): # num partitions is the number of results(x).txt
             ii.write(json.dumps(res) + "\n")
 
 
+    
+
+
 if __name__ == "__main__":
     mainFunc()
+    mergeTester(countPrints)
