@@ -1,6 +1,7 @@
 import sys
 import json
 from collections import defaultdict
+import time
 
 
 class InvertedIndexSearcher:
@@ -10,7 +11,7 @@ class InvertedIndexSearcher:
         self.key_file_path = key_file_path
         self.index_file_path = index_file_path
         self.token_to_offset = self._load_keys()
-
+        self.fileHandle = open(index_file_path, 'rb')
 
     def _load_keys(self) -> dict:
         with open(self.key_file_path, 'r') as f:
@@ -26,32 +27,30 @@ class InvertedIndexSearcher:
     
     def _get_postings(self, offset: int):
 
-        with open(self.index_file_path, 'rb') as f:
-            f.seek(offset)
+        #with open(self.index_file_path, 'rb') as f:
+            #f.seek(offset)
+            #txt = f.readline()
+            #obj = json.loads(txt)#(f.readline())
 
-            # print(f.readline())
+            #return obj
+        (self.fileHandle).seek(offset)
+        txt = (self.fileHandle).readline()
+        obj = json.loads(txt)
 
-            obj = json.loads(f.readline())
-
-            return obj
-
+        return obj
     def find_docs(self, tokens: list[str]):
 
         results = []
         for token in tokens:
-
             token_offset = self._get_offset(token.lower())
-
             if token_offset is None:
                 return []
-            # print(f'Token: {token.lower()} is at Offset {token_offset[0]}')
+            #print(token, token_offset)
+            postings = self._get_postings(token_offset)[token.lower()][0][0]
 
-            postings = self._get_postings(int(token_offset[0]))[token.lower()][0]
-            # token_freq_map = {doc_id: freq for doc_id, freq in postings}
-            # print(postings)
             if postings is None:
                 return []
-            token_map = {doc_id: post[2] for post in postings}
+            token_map = {post[0]: post[2] for post in postings}
             results.append(token_map)
 
 
@@ -73,16 +72,23 @@ class InvertedIndexSearcher:
 
 def main(): # python3 querySearch.py [key_file_path] [index_file_path]
 
-    query = input("Enter Query (Ex: cristina lopes): ").split()
+    query = input("Enter Query Below (Ex: cristina lopes): ").split()
+    
+
     # print(query)
     searcher = InvertedIndexSearcher(sys.argv[1], sys.argv[2])
+    start_time = time.time()
     docs = searcher.find_docs(query)
-
-    print("DOC IDs :", docs[:5])
-
-
+    urlMappings = {}
+    with open('url_ids.json', 'r') as f:
+        urlMappings = json.loads(f.read())
+    for elem in docs[:5]:
+        print(urlMappings[str(elem[0])], ", ")
+        # elem has 2 elements
+    #print(docs)
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time:.6f} seconds")
+    searcher.fileHandle.close()
 if __name__ == "__main__":
 
     main()
-
-        
