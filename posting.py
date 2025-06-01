@@ -3,11 +3,11 @@ import os
 
 class Posting:
     # stores urls and ids in memory to speed up indexer
-    id_cache = {}
+    #id_cache = {}
 
     def __init__(self, url: str, token: str, token_freq: int) -> None:
         # int representing the URL the token was found in
-        self.url_id = self.get_url_id(url)
+        #self.url_id = self.get_url_id(url)
 
         # the token itself
         self.token = token
@@ -42,5 +42,6 @@ class Posting:
         return index
 
 
+
     def __repr__(self) -> str:
-        return f"({self.url_id}, {self.token_freq})"
+        return f"({self.token}, {self.token_freq})"
