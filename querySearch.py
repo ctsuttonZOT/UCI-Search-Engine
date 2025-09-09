@@ -7,7 +7,6 @@ from porter_stemming import porter_stem
 class InvertedIndexSearcher:
 
     def __init__(self, key_file_path : str, index_file_path: str):
-
         self.key_file_path = key_file_path
         self.index_file_path = index_file_path
         self.token_to_offset = self._load_keys()
@@ -19,14 +18,11 @@ class InvertedIndexSearcher:
     
 
     def _get_offset(self, token: str):
-
         if token not in self.token_to_offset:
-
             return None
         return self.token_to_offset[token]
     
     def _get_postings(self, offset: int):
-
         #with open(self.index_file_path, 'rb') as f:
             #f.seek(offset)
             #txt = f.readline()
@@ -38,15 +34,15 @@ class InvertedIndexSearcher:
         obj = json.loads(txt)
 
         return obj
-    def find_docs(self, tokens: list[str]):
 
+    def find_docs(self, tokens: list[str]):
         results = []
         for token in tokens:
-            token =  porter_stem(token)
+            token = porter_stem(token)
             token_offset = self._get_offset(token.lower())
             if token_offset is None:
                 return []
-            #print(token, token_offset)
+            print(token, token_offset)
             postings = self._get_postings(token_offset)[token.lower()][0][0]
 
             if postings is None:
@@ -72,12 +68,13 @@ class InvertedIndexSearcher:
         return sorted_docs
     
 def server_main(query):
-    # print(query)
-    searcher = InvertedIndexSearcher('offsets.txt', 'inverted_index.txt')
+    # called from server directory, so must go back 2 directories to reach any files
+    searcher = InvertedIndexSearcher('../../offsets.txt', '../../inverted_index.txt')
     start_time = time.time()
+    print("Query: ", query)
     docs = searcher.find_docs(query)
     urlMappings = {}
-    with open('url_ids.json', 'r') as f:
+    with open('../../url_ids.json', 'r') as f:
         urlMappings = json.loads(f.read())
     urls = []
     for elem in docs[:5]:
@@ -93,7 +90,6 @@ def server_main(query):
     return urls
 
 def main(): # python3 querySearch.py [key_file_path] [index_file_path]
-
     query = input("Enter Query Below (Ex: cristina lopes): ").split()
     
 
@@ -111,6 +107,6 @@ def main(): # python3 querySearch.py [key_file_path] [index_file_path]
     end_time = time.time()
     print(f"Time taken: {end_time - start_time:.6f} seconds")
     searcher.fileHandle.close()
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     main()
