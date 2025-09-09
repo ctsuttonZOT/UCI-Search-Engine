@@ -15,7 +15,6 @@ class Posting:
         # num of times the token occurs in the page
         self.token_freq = token_freq
 
-
     def get_url_id(self, url: str) -> int:
         # if the file doesn't exist, or it's empty, initialize it with default data
         if not (os.path.exists("url_ids.json")) or os.stat("url_ids.json").st_size == 0:
@@ -40,8 +39,6 @@ class Posting:
         Posting.id_cache[url] = index
 
         return index
-
-
 
     def __repr__(self) -> str:
         return f"({self.token}, {self.token_freq})"

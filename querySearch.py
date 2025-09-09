@@ -5,7 +5,6 @@ import time
 from porter_stemming import porter_stem
 
 class InvertedIndexSearcher:
-
     def __init__(self, key_file_path : str, index_file_path: str):
         self.key_file_path = key_file_path
         self.index_file_path = index_file_path
@@ -15,7 +14,6 @@ class InvertedIndexSearcher:
     def _load_keys(self) -> dict:
         with open(self.key_file_path, 'r') as f:
             return json.load(f)
-    
 
     def _get_offset(self, token: str):
         if token not in self.token_to_offset:
@@ -91,7 +89,6 @@ def server_main(query):
 
 def main(): # python3 querySearch.py [key_file_path] [index_file_path]
     query = input("Enter Query Below (Ex: cristina lopes): ").split()
-    
 
     # print(query)
     searcher = InvertedIndexSearcher(sys.argv[1], sys.argv[2])

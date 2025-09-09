@@ -30,8 +30,7 @@ def porter_stem(word:str) -> str:
         word = word[:-1]
 
     return word
-    
-    
+ 
 def restore_e_if_needed(stem: str) -> str:
         if stem.endswith(("ng", "v", "p", "c", "t")) and len(stem) >= 3:
             return stem + "e"
@@ -168,10 +167,8 @@ def strip_context_suffix(w: str) ->str:
                 return stem
     return w
 
-
 def main():
-    
-    
     print(porter_stem(sys.argv[1]))
 
-main()
+if __name__ == "__main__":
+    main()

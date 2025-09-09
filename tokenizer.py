@@ -2,7 +2,6 @@ import sys
 from porter_stemming import porter_stem
 from bs4 import BeautifulSoup
 
-
 # Time Complexity: O(1), it does a constant amount of comparisons each function call
 def isAlphanumerical(char):
     if (char >= 'a' and char <= 'z') or (char >= 'A' and char <= 'Z'):

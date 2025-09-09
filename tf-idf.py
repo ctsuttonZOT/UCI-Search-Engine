@@ -23,7 +23,6 @@ def calculate_weighted_tf(postings_lists: list[list[tuple[int, int]]], doc_id: i
                 continue
     return tf    
 
-
 def compute_idf(postings_lists: list[list[tuple[int, int]]], total_docs: int) -> float: 
     doc_ids = set()
     for posting_list in postings_lists:
@@ -35,7 +34,6 @@ def compute_idf(postings_lists: list[list[tuple[int, int]]], total_docs: int) ->
                 continue
     df = len(doc_ids)
     return log(total_docs / df, 10) if df != 0 else 0.0
-
 
 def update_index_scores(filename: str, total_docs: int):
     global lineProcessed
@@ -89,7 +87,6 @@ def update_index_scores(filename: str, total_docs: int):
     # replace original index with new index that has tf-idf scores
     os.replace(temp_file.name, filename)
 
-
 def createOffsetFile(fileName):
     offsets = {}
     with open(fileName, 'r') as file:
@@ -105,7 +102,6 @@ def createOffsetFile(fileName):
                 cond = False
     with open('offsets.txt', 'w') as file:
         file.write(json.dumps(offsets))
-
 
 # python3 tf-idf.py [index_file_path] [total_docs]
 def main():

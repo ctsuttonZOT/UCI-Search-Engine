@@ -20,7 +20,6 @@ setEncodings = set()
 
 # want to get count of tokens, bolded or not, header or not, title or not
 def htmlParser(htmlContent, url):
-
     # Every 500 files, check if our map is larger than 400MB, if so then print entry into its own file
     if fileNum % 500 == 0 and fileNum != 0:
         print("File number: ", fileNum)
@@ -61,9 +60,7 @@ def htmlParser(htmlContent, url):
     # update map
     updateMap(texts, titles, bolds, h1s, h2s, h3s)
 
-
 def updateSingle(stats: list[Posting], k):
-
     if len(stats) == 0: # empty lists
         return
 
@@ -82,7 +79,6 @@ def updateSingle(stats: list[Posting], k):
             mapTemp[curr_posting.token] = [ [], [], [], [], [], []]
             mapTemp[curr_posting.token][k].append((fileNum, curr_posting.token_freq))
 
-
 def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # called for each file, at end 
     global fileNum
     updateSingle(allTxt, 0)
@@ -97,13 +93,11 @@ def updateMap(allTxt, title, bolds, h1s, h2s, h3s): # called for each file, at e
 
         print("total sz: ",total_size)
 
-
 def listToString(lst):
     str = ""
     for item in lst:
         str += " " + item.get_text(separator=" ", strip=True)
     return str
-
 
 def processText(text, url): # text -> [(token, count), ...], returns list of tokens with count of occurences 
     tempMap = computeWordFrequencies(tokenize(text))
@@ -111,7 +105,6 @@ def processText(text, url): # text -> [(token, count), ...], returns list of tok
     for key, val in tempMap.items():
         res.append(Posting(url, key, val))
     return res
-
 
 def fileProcessor(fileName): # opens file, loads json, sends text content to json
     global fileNum
@@ -128,8 +121,6 @@ def fileProcessor(fileName): # opens file, loads json, sends text content to jso
     htmlParser(text, fileJson["url"])
     #id_url_map[fileNum] = fileJson["url"]
     fileNum += 1
-
-
 
 def printToFileEachEntry(): # Sorts current map by key, then writes to file by appending single line json for each entry
     # Sort map
@@ -150,8 +141,6 @@ def printToFileEachEntry(): # Sorts current map by key, then writes to file by a
 
     countPrints += 1
 
-
-
 def mainFunc(): # For all files in directory ROOT_DIR, call fileProcessor
     global id_url_map   
     for dirpath, dirnames, filenames in os.walk(ROOT_DIR):
@@ -164,7 +153,6 @@ def mainFunc(): # For all files in directory ROOT_DIR, call fileProcessor
     id_url_map = {}
     print(countEmptyStrings)
     print(setEncodings)
-
 
 def mergeTester(numPartitions): # num partitions is the number of results(x).txt files that are produced
     global mapTemp
@@ -229,10 +217,6 @@ def mergeTester(numPartitions): # num partitions is the number of results(x).txt
                     else:
                         arrayLines[i] = aL
             ii.write(json.dumps(res) + "\n")
-
-
-    
-
 
 if __name__ == "__main__":
     mainFunc()
