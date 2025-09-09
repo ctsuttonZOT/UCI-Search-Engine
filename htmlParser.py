@@ -5,7 +5,7 @@ import json
 import os
 from pympler import asizeof
 
-root_dir = r"C:\Users\rickg\OneDrive\Desktop\developer\DEV"
+ROOT_DIR = r"DEV"
 
 milestone = 400000000 # 400 MBs / 400,000,000 bytes
 countPrints = 0 
@@ -152,9 +152,9 @@ def printToFileEachEntry(): # Sorts current map by key, then writes to file by a
 
 
 
-def mainFunc(): # For all files in directory root_dir, call fileProcessor
+def mainFunc(): # For all files in directory ROOT_DIR, call fileProcessor
     global id_url_map   
-    for dirpath, dirnames, filenames in os.walk(root_dir):
+    for dirpath, dirnames, filenames in os.walk(ROOT_DIR):
         for fn in filenames:
             pathToFile = os.path.join(dirpath, fn)
             fileProcessor(pathToFile)
