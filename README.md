@@ -1,1 +1,1 @@
-# CS121A3
+# Python-based Search Engine to search UCI web pages.
